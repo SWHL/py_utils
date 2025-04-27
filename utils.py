@@ -24,6 +24,36 @@ FFMPEG_PATH = cfg.ffmpeg_path
 FFPROBE_PATH = cfg.ffprobe_path
 
 
+def generate_equal_segments(total_length, num_segments):
+    """
+    生成均分的索引段
+
+    参数:
+        total_length (int): 总长度/范围
+        num_segments (int): 要分成几段
+
+    返回:
+        list: 包含(start, end)元组的列表，表示每段的索引范围
+    """
+    if num_segments <= 0 or total_length <= 0:
+        return []
+
+    segment_size = total_length // num_segments
+    remainder = total_length % num_segments
+
+    segments = []
+    start = 0
+
+    for i in range(num_segments):
+        # 计算当前段的大小（前面的段可能会多1个元素）
+        current_size = segment_size + (1 if i < remainder else 0)
+        end = start + current_size
+        segments.append((start, end))
+        start = end
+
+    return segments
+
+
 def iou(box0: np.ndarray, box1: np.ndarray):
     """计算一对一交并比
 
