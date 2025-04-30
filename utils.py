@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+import decord
 import cv2
 import numpy as np
 import pandas as pd
@@ -23,6 +24,29 @@ cfg = OmegaConf.load(cfg_path)
 FFMPEG_PATH = cfg.ffmpeg_path
 FFPROBE_PATH = cfg.ffprobe_path
 
+
+
+class ReadVideoByDecord:
+    @classmethod
+    def get_batch_frames(
+        cls, video_path: Union[str, Path], start_frame: int, end_frame: int
+    ) -> np.ndarray:
+        frame_indices = list(range(start_frame, end_frame))
+        with cls.read_video_decord(video_path) as video_reader:
+            #  # B,G,R order align to ori code base: https://github.com/IDEA-Research/DWPose/blob/onnx/ControlNet-v1-1-nightly/dwpose_infer_example.py
+            batch_frames = video_reader.get_batch(frame_indices).asnumpy()
+        return batch_frames
+
+    @staticmethod
+    @contextmanager
+    def read_video_decord(video_path: Union[str, Path]):
+        import decord  # 局部import避免未知的全局影响
+
+        cap = decord.VideoReader(video_path)
+        try:
+            yield cap
+        finally:
+            del cap
 
 def generate_equal_segments(total_length, num_segments):
     """
