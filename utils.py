@@ -9,7 +9,6 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import decord
 import cv2
 import numpy as np
 import pandas as pd
